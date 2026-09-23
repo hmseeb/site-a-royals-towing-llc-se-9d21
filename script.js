@@ -89,14 +89,22 @@
   });
 
   /* ---------------------------------------------------------------
-     Quote form validation
-     No backend is wired up, so the form validates locally and then
-     hands the visitor a direct phone route.
+     Contact / quote forms
+     Validates locally, then posts the submission to /api/lead, which
+     creates or updates the contact in GoHighLevel. A thank-you message
+     is shown in place once the submission is accepted.
      --------------------------------------------------------------- */
-  var form = document.getElementById('quoteForm');
-  var status = document.getElementById('formStatus');
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
 
-  if (form) {
+  function wireForm(form) {
+    var status = form.querySelector('.form-note');
+    var submitBtn = form.querySelector('[type="submit"]');
+    var formName = form.getAttribute('data-form-name') || 'Website Form';
+
     var PHONE_RE = /^[\d\s().+-]{10,}$/;
     var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
 
@@ -122,15 +130,15 @@
         setError(input, 'This field is required.');
         return false;
       }
-      if (input.id === 'phone' && value && !PHONE_RE.test(value)) {
+      if (input.name === 'phone' && value && !PHONE_RE.test(value)) {
         setError(input, 'Please enter a valid phone number.');
         return false;
       }
-      if (input.id === 'email' && value && !EMAIL_RE.test(value)) {
+      if (input.name === 'email' && value && !EMAIL_RE.test(value)) {
         setError(input, 'Please enter a valid email address.');
         return false;
       }
-      if (input.id === 'name' && value && value.length < 2) {
+      if (input.name === 'name' && value && value.length < 2) {
         setError(input, 'Please enter your name.');
         return false;
       }
@@ -153,8 +161,16 @@
       });
     });
 
+    function valueOf(fieldName) {
+      var el = form.querySelector('[name="' + fieldName + '"]');
+      return el ? (el.value || '').trim() : '';
+    }
+
+    var sending = false;
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
+      if (sending) return;
 
       var firstBad = null;
       fields.forEach(function (input) {
@@ -170,26 +186,73 @@
         return;
       }
 
-      var name = (document.getElementById('name').value || '').trim().split(/\s+/)[0];
+      var firstName = valueOf('name').split(/\s+/)[0];
 
+      var payload = {
+        formName: formName,
+        name: valueOf('name'),
+        phone: valueOf('phone'),
+        email: valueOf('email'),
+        message: valueOf('message'),
+        service: valueOf('service'),
+        location: valueOf('location'),
+        vehicle: valueOf('vehicle')
+      };
+
+      sending = true;
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.setAttribute('aria-busy', 'true');
+      }
       if (status) {
-        status.innerHTML =
-          'Thanks' + (name ? ', ' + escapeHtml(name) : '') +
-          ' &mdash; your request is noted. For the fastest response, call dispatch now at ' +
-          '<a href="tel:+19159005680">(915) 900-5680</a>.';
-        status.className = 'form-note ok';
+        status.textContent = 'Sending your request…';
+        status.className = 'form-note';
       }
 
-      form.reset();
-      fields.forEach(function (input) { setError(input, ''); });
-    });
+      function thankYou(delivered) {
+        if (status) {
+          status.innerHTML =
+            'Thank you' + (firstName ? ', ' + escapeHtml(firstName) : '') +
+            ' &mdash; your request has been received' +
+            (delivered ? '' : ', but we could not confirm delivery') +
+            '. For the fastest response, call dispatch now at ' +
+            '<a href="tel:+19159005680">(915) 900-5680</a>.';
+          status.className = 'form-note ' + (delivered ? 'ok' : 'bad');
+        }
+        if (delivered) {
+          form.reset();
+          fields.forEach(function (input) { setError(input, ''); });
+        }
+      }
 
-    function escapeHtml(str) {
-      return String(str).replace(/[&<>"']/g, function (c) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-      });
-    }
+      function done() {
+        sending = false;
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.removeAttribute('aria-busy');
+        }
+      }
+
+      fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (data) {
+          return res.ok && data && data.ok !== false;
+        });
+      }).then(function (ok) {
+        thankYou(ok);
+      }).catch(function () {
+        thankYou(false);
+      }).then(done, done);
+    });
   }
+
+  Array.prototype.forEach.call(
+    document.querySelectorAll('form[data-ghl-form]'),
+    wireForm
+  );
 
   /* ---------------------------------------------------------------
      Reveal-on-scroll for cards (progressive enhancement)

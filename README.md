@@ -5,8 +5,10 @@ roadside assistance company serving El Paso, TX and surrounding areas.
 
 ## Stack
 
-Vanilla HTML, CSS and JavaScript. No build step, no dependencies, no environment
-variables. Open `index.html` in a browser, or serve the directory statically.
+Vanilla HTML, CSS and JavaScript. No build step and no dependencies. Open
+`index.html` in a browser, or serve the directory statically. The quote form
+posts to a serverless function, so form delivery only works on a deployment
+(see **Lead delivery** below).
 
 ```bash
 python3 -m http.server 8000
@@ -19,6 +21,33 @@ python3 -m http.server 8000
 | `index.html` | Entry point — all page sections and structured data |
 | `styles.css` | Design system, layout and responsive rules |
 | `script.js` | Mobile nav, sticky header, FAQ accordion, form validation, scroll reveals |
+| `api/lead.js` | Serverless handler that sends form submissions to GoHighLevel |
+
+## Lead delivery
+
+Every form marked with `data-ghl-form` posts to `/api/lead`, which creates or
+updates the contact in the GoHighLevel sub-account. Each submission:
+
+- upserts the contact with first name, last name, phone and email
+- sets the custom field **Lead Source** to `Website` and **Website Form** to the
+  submitting form's `data-form-name`
+- adds the tag `website-lead` (added separately so existing tags are kept)
+- stores the visitor's message, plus service, location and vehicle, as a note on
+  the contact — and in a **Message** custom field when the sub-account has one
+
+`Lead Source` and `Website Form` are created automatically if the sub-account
+does not already have them.
+
+### Environment variables
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `GHL_API_KEY` | yes | GoHighLevel Private Integration token with contacts read/write scope |
+| `GHL_LOCATION_ID` | no | Sub-account id (defaults to `JXTJ0hx2dveAx8AWdpSM`) |
+| `GHL_API_VERSION` | no | API version header (defaults to `2021-07-28`) |
+
+Without `GHL_API_KEY` the endpoint returns 503 and the form tells the visitor to
+call dispatch instead, so submissions are never silently lost.
 
 ## Sections
 
@@ -38,13 +67,13 @@ All content is sourced from the company's own published material and public reco
 
 ### Notes for the business owner
 
-Two items could not be verified and were deliberately left off the page rather than guessed:
+One item could not be verified and was deliberately left off the page rather than guessed:
 
 1. **Email address.** No email is published on the company's own site. Add one to the
    contact section when confirmed.
-2. **Contact form delivery.** The form validates in the browser and then directs the
-   visitor to call dispatch. Connect it to a form service or mail handler to receive
-   submissions by email.
+
+Form submissions go to the GoHighLevel sub-account — set `GHL_API_KEY` in the
+deployment environment for delivery to work.
 
 Only one verifiable customer review exists publicly, so the testimonials section
 features that single real review alongside verifiable credentials. No reviews were invented.
