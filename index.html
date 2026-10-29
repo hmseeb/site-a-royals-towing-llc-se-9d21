@@ -9,14 +9,14 @@
 <meta name="author" content="A Royals Towing LLC">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#0b1437">
-<link rel="canonical" href="https://www.royalstowing.com/">
+<link rel="canonical" href="https://www.aroyalstowing.com/">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="A Royals Towing LLC">
 <meta property="og:title" content="24/7 Towing &amp; Roadside Assistance | El Paso, TX | A Royals Towing LLC">
 <meta property="og:description" content="Stranded in El Paso? Towing, jump starts, lockouts, tire changes and fuel delivery, 24/7. 30-60 minute ETA. Call (915) 900-5680.">
 <meta property="og:image" content="https://images.unsplash.com/photo-1730514784243-f0e7f09c9f50?auto=format&amp;fit=crop&amp;w=1600&amp;h=900&amp;q=80">
-<meta property="og:url" content="https://www.royalstowing.com/">
+<meta property="og:url" content="https://www.aroyalstowing.com/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="24/7 Towing &amp; Roadside Assistance | El Paso, TX | A Royals Towing LLC">
 <meta name="twitter:description" content="Towing, jump starts, lockouts, tire changes and fuel delivery across El Paso. 30-60 minute ETA. Call (915) 900-5680.">
@@ -38,7 +38,7 @@
   "name": "A Royals Towing LLC",
   "description": "24/7 towing and light-duty roadside assistance serving El Paso, TX and surrounding areas within 20 miles.",
   "telephone": "+1-915-900-5680",
-  "url": "https://www.royalstowing.com/",
+  "url": "https://www.aroyalstowing.com/",
   "image": "https://images.unsplash.com/photo-1730514784243-f0e7f09c9f50?auto=format&fit=crop&w=1600&h=900&q=80",
   "priceRange": "$$",
   "address": {
@@ -79,7 +79,7 @@
   <div class="wrap header-inner">
     <a class="brand" href="#top" aria-label="A Royals Towing LLC home">
       <img class="brand-mark"
-           src="https://static.wixstatic.com/media/3d321f_3e9f1c369462481a97f93ab93c8db331~mv2.png"
+           src="/assets/aroyals-logo.png"
            alt="A Royals Towing LLC company logo" width="56" height="56">
       <span class="brand-text">
         <span class="brand-name">A Royals Towing <em>LLC</em></span>
@@ -585,7 +585,11 @@
         <h3>Request a quote</h3>
         <p class="form-sub">Tell us where you are and what happened. For emergencies, call <a href="tel:+19159005680">(915) 900-5680</a>.</p>
 
-        <form id="quoteForm" data-ghl-form data-form-name="Request a Quote" novalidate>
+        <form id="quoteForm" method="POST" action="https://vision.leadrai.com/api/forms/cf07c6aef86899ff53d70c1d976689c2" data-ghl-form data-form-name="Request a Quote" novalidate>
+          <input type="hidden" name="_form" value="Quote request">
+          <input type="hidden" name="_page" value="">
+          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="display:none">
+
           <div class="field">
             <label for="name">Your name <span class="req">*</span></label>
             <input type="text" id="name" name="name" autocomplete="name" required placeholder="Peter Gonzalez">
@@ -608,7 +612,7 @@
           <div class="row">
             <div class="field">
               <label for="service">Service needed <span class="req">*</span></label>
-              <select id="service" name="service" required>
+              <select id="service" name="Service needed" required>
                 <option value="">Choose a service&hellip;</option>
                 <option>Towing</option>
                 <option>Jump Start Service</option>
@@ -626,19 +630,19 @@
             </div>
             <div class="field">
               <label for="location">Your location <span class="req">*</span></label>
-              <input type="text" id="location" name="location" required placeholder="I-10 near Mesa St, El Paso">
+              <input type="text" id="location" name="Your location" required placeholder="I-10 near Mesa St, El Paso">
               <p class="err" data-for="location"></p>
             </div>
           </div>
 
           <div class="field">
             <label for="vehicle">Vehicle (year, make, model)</label>
-            <input type="text" id="vehicle" name="vehicle" placeholder="2016 Chevy Silverado">
+            <input type="text" id="vehicle" name="Vehicle" placeholder="2016 Chevy Silverado">
           </div>
 
           <div class="field">
             <label for="message">What&rsquo;s going on?</label>
-            <textarea id="message" name="message" rows="4" placeholder="Front driver tire blew out, no spare in the truck."></textarea>
+            <textarea id="message" name="Message" rows="4" placeholder="Front driver tire blew out, no spare in the truck."></textarea>
           </div>
 
           <button class="btn btn-gold btn-block" type="submit">Send request</button>
@@ -656,7 +660,7 @@
 <footer class="site-footer">
   <div class="wrap foot-grid">
     <div class="foot-brand">
-      <img src="https://static.wixstatic.com/media/3d321f_3e9f1c369462481a97f93ab93c8db331~mv2.png"
+      <img src="/assets/aroyals-logo.png"
            alt="A Royals Towing LLC logo" width="64" height="64" loading="lazy">
       <p class="foot-name">A Royals Towing <em>LLC</em></p>
       <p class="foot-tag">Trained Professionals &middot; Outstanding Quality</p>

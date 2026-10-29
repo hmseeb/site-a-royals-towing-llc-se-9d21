@@ -90,10 +90,14 @@
 
   /* ---------------------------------------------------------------
      Contact / quote forms
-     Validates locally, then posts the submission to /api/lead, which
-     creates or updates the contact in GoHighLevel. A thank-you message
-     is shown in place once the submission is accepted.
+     Validates locally, then posts the submission to LeadrVision (the same
+     endpoint as the form's action attribute, so the form also works with
+     JavaScript disabled). A thank-you message is shown in place once the
+     submission is accepted.
      --------------------------------------------------------------- */
+  var LEAD_ENDPOINT = 'https://vision.leadrai.com/api/forms/cf07c6aef86899ff53d70c1d976689c2';
+  var THANKS = 'Thanks, your message was sent.';
+
   function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -104,6 +108,10 @@
     var status = form.querySelector('.form-note');
     var submitBtn = form.querySelector('[type="submit"]');
     var formName = form.getAttribute('data-form-name') || 'Website Form';
+
+    // So visitors come back to the right page after a plain HTML submission.
+    var pageField = form.querySelector('[name="_page"]');
+    if (pageField) pageField.value = window.location.href;
 
     var PHONE_RE = /^[\d\s().+-]{10,}$/;
     var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
@@ -189,14 +197,16 @@
       var firstName = valueOf('name').split(/\s+/)[0];
 
       var payload = {
-        formName: formName,
+        _form: valueOf('_form') || formName,
+        _page: window.location.href,
+        _gotcha: valueOf('_gotcha'),
         name: valueOf('name'),
         phone: valueOf('phone'),
         email: valueOf('email'),
-        message: valueOf('message'),
-        service: valueOf('service'),
-        location: valueOf('location'),
-        vehicle: valueOf('vehicle')
+        'Message': valueOf('Message'),
+        'Service needed': valueOf('Service needed'),
+        'Your location': valueOf('Your location'),
+        'Vehicle': valueOf('Vehicle')
       };
 
       sending = true;
@@ -212,10 +222,10 @@
       function thankYou(delivered) {
         if (status) {
           status.innerHTML =
-            'Thank you' + (firstName ? ', ' + escapeHtml(firstName) : '') +
-            ' &mdash; your request has been received' +
-            (delivered ? '' : ', but we could not confirm delivery') +
-            '. For the fastest response, call dispatch now at ' +
+            (delivered
+              ? THANKS + (firstName ? ' We&rsquo;ll be in touch shortly, ' + escapeHtml(firstName) + '.' : '')
+              : 'Your request was sent, but we could not confirm delivery.') +
+            ' For the fastest response, call dispatch now at ' +
             '<a href="tel:+19159005680">(915) 900-5680</a>.';
           status.className = 'form-note ' + (delivered ? 'ok' : 'bad');
         }
@@ -233,7 +243,7 @@
         }
       }
 
-      fetch('/api/lead', {
+      fetch(LEAD_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -249,10 +259,22 @@
     });
   }
 
-  Array.prototype.forEach.call(
-    document.querySelectorAll('form[data-ghl-form]'),
-    wireForm
-  );
+  var leadForms = document.querySelectorAll('form[data-ghl-form]');
+  Array.prototype.forEach.call(leadForms, wireForm);
+
+  /* ---------------------------------------------------------------
+     Plain (no-JavaScript) submissions come back to this page with
+     ?submitted=1 — confirm the message was sent.
+     --------------------------------------------------------------- */
+  if (/[?&]submitted=1(&|$)/.test(window.location.search) && leadForms.length) {
+    var firstStatus = leadForms[0].querySelector('.form-note');
+    if (firstStatus) {
+      firstStatus.innerHTML = THANKS +
+        ' For the fastest response, call dispatch now at ' +
+        '<a href="tel:+19159005680">(915) 900-5680</a>.';
+      firstStatus.className = 'form-note ok';
+    }
+  }
 
   /* ---------------------------------------------------------------
      Reveal-on-scroll for cards (progressive enhancement)

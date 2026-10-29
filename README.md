@@ -58,7 +58,7 @@ motor club networks → testimonials → service-area CTA → FAQ → contact wi
 
 All content is sourced from the company's own published material and public records.
 
-- **Phone:** (915) 900-5680 — the number listed on every page of royalstowing.com
+- **Phone:** (915) 900-5680 — the number listed on every page of aroyalstowing.com
 - **Hours:** Open 24 hours, 7 days a week
 - **Service area:** El Paso, Lanark, Alton, Alvarado, Horizon City, San Miguel and any
   area within 20 miles, plus Sunland Park, NM
